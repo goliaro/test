@@ -25,3 +25,4 @@ jobs:
         run: |
           echo "VAR1_TEST=$(head -n 1 file1.txt)" >> $GITHUB_ENV
           echo "VAR2_TEST=$(tail -n 1 file1.txt)" >> $GITHUB_ENV
+      - run: printenv
