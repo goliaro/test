@@ -32,6 +32,10 @@ jobs:
       - run: printenv
       - run: python3 print_color.py
       - run: echo "github sha is ${{ github.event.after }}"
+      - run: python3 |
+          import os
+          print(os.getenv("GITHUB_SHA"))
+          print(os.getenv("github.event.after")
 
       - name: Show GitHub context
         env:
