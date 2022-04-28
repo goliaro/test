@@ -31,3 +31,4 @@ jobs:
           echo "VAR2_TEST=$(tail -n 1 file1.txt)" >> $GITHUB_ENV
       - run: printenv
       - run: python3 print_color.py
+      - run: echo ${{ github.sha }}
