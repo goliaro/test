@@ -32,3 +32,8 @@ jobs:
       - run: printenv
       - run: python3 print_color.py
       - run: echo ${{ github.sha }}
+
+      - name: Show GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
