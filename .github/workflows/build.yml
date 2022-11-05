@@ -1,0 +1,99 @@
+name: "build"
+on:
+  schedule:
+    # Run weekly on Saturday at midnight PT (3am ET / 8am UTC)
+    - cron: "0 8 * * 6"
+  push:
+    branches:
+      - "master"
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: build-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+jobs:
+  build-dependencies:
+    name: Build the FlexFlow dependencies
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        cuda_version:
+          [
+            "10.1.243"
+          ]
+      fail-fast: true
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Git Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Build NCCL/Legion
+        env:
+          #DEPENDENCY: ${{ matrix.dependency }}
+        run: |
+          set -x
+          mkdir -p build/deps
+          cd build/deps
+          wget https://www.gabrieleoliaro.it/nccl_ubuntu-20.04_11.7.0.zip
+          unzip nccl_ubuntu-20.04_11.7.0.zip -d nccl
+          ls
+          du -h nccl
+          cd nccl
+          ls -R
+          rm -rf lib/*.so.*
+          cd ..
+          du -h nccl
+          cd nccl/lib
+          ln -s libnccl.so libnccl.so.1
+          ls -li
+
+      - name: Prepare library files
+        env:
+          NCCL_TARBALL: nccl_ubuntu-20.04_11.7.0.tar.gz
+          #LEGION_TARBALL: legion_${{ matrix.os }}_${{ matrix.cuda_version }}.tar.gz
+        run: |
+          tar -zcvf $NCCL_TARBALL build/deps/nccl/
+          #tar -zcvf $NCCL_TARBALL build/export/legion/
+
+      # - name: Archive compiled Legion library
+      #   uses: actions/upload-artifact@v3
+      #   #if: ${{ matrix.dependency == 'legion' }}
+      #   with:
+      #     name: legion_${{ matrix.os }}_${{ matrix.cuda_version }}
+      #     path: legion_${{ matrix.os }}_${{ matrix.cuda_version }}.tar.gz
+
+      - name: Archive compiled NCCL library
+        uses: actions/upload-artifact@v3
+        #if: ${{ matrix.dependency == 'nccl' }}
+        with:
+          name: nccl_ubuntu-20.04_11.7.0
+          path: nccl_ubuntu-20.04_11.7.0.tar.gz
+
+  create-release:
+    name: Create new release
+    runs-on: ubuntu-20.04
+    needs: build-dependencies
+    steps:
+      - name: Create folder for artifacts
+        run: mkdir artifacts
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./artifacts
+      - name: Display structure of downloaded files
+        working-directory: ./artifacts
+        run: ls -R
+      # - name: Compress all artifacts
+      #   working-directory: ./artifacts
+      #   run: find . -maxdepth 1 -mindepth 1 -type d -exec tar zcvf ../compressed_artifacts/{}.tar.gz {}  \;
+      # - name: Get datetime
+      #   run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      # - name: Release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     name: ${{ env.RELEASE_DATETIME }}
+      #     tag_name: ${{ env.RELEASE_DATETIME }}
+      #     token: ${{ secrets.FLEXFLOW_TOKEN }}
+      #     files: ./artifacts/*.tar.gz
