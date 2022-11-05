@@ -30,30 +30,48 @@ jobs:
           submodules: recursive
 
       - name: Build NCCL/Legion
+        env:
+          NCCL_TARBALL: nccl_ubuntu-20.04_11.7.0.tar.gz
         run: |
           set -x
           mkdir -p build/deps
           cd build/deps
-          wget https://www.gabrieleoliaro.it/nccl_ubuntu-20.04_11.7.0.zip
+          echo "Downloading..."
+          wget -q https://www.gabrieleoliaro.it/nccl_ubuntu-20.04_11.7.0.zip
+          echo "Unzipping..."
           unzip nccl_ubuntu-20.04_11.7.0.zip -d nccl
-          ls
+          echo "Printing contents of build/deps/nccl folder..."
+          ls nccl
+          echo "Checking size of nccl folder..."
           du -h nccl
-          cd nccl
-          ls -R
+          echo "Removing unnecessary stuff"
+          rm -rf nccl/obj nccl/src nccl/tmp
           rm -rf lib/*.so.*
-          cd ..
+          echo "Checking size of nccl folder again..."
           du -h nccl
+          echo "Creating a couple of simlinks..."
           cd nccl/lib
           ln -s libnccl.so libnccl.so.1
+          ln -s libnccl.so libnccl.so.124.24
+          echo "ls -li of nccl lib folder:"
           ls -li
-
-      - name: Prepare library files
-        env:
-          NCCL_TARBALL: nccl_ubuntu-20.04_11.7.0.tar.gz
-          #LEGION_TARBALL: legion_${{ matrix.os }}_${{ matrix.cuda_version }}.tar.gz
-        run: |
+          cd ../..
+          echo "Checking size of nccl folder once more..."
+          du -h nccl
+          cd ../..
+          echo "Creating archive $NCCL_TARBALL"
           tar -zcvf $NCCL_TARBALL build/deps/nccl/
-          #tar -zcvf $NCCL_TARBALL build/export/legion/
+          echo "Checking size of archive..."
+          du -h .
+
+
+      # - name: Prepare library files
+      #   env:
+      #     NCCL_TARBALL: nccl_ubuntu-20.04_11.7.0.tar.gz
+      #     #LEGION_TARBALL: legion_${{ matrix.os }}_${{ matrix.cuda_version }}.tar.gz
+      #   run: |
+      #     tar -zcvf $NCCL_TARBALL build/deps/nccl/
+      #     #tar -zcvf $NCCL_TARBALL build/export/legion/
 
       # - name: Archive compiled Legion library
       #   uses: actions/upload-artifact@v3
@@ -80,9 +98,20 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ./artifacts
-      - name: Display structure of downloaded files
+      - name: Check downloaded files
         working-directory: ./artifacts
-        run: ls -R
+        run: |
+          echo "Running ls on artifacts folder..."
+          ls
+          echo "Running du on artifacts folder..."
+          du -h .
+          echo "Entering nccl_ubuntu-20.04_11.7.0 folder..."
+          cd nccl_ubuntu-20.04_11.7.0
+          echo "Calling ls in folder"
+          ls
+          echo "Calling du in folder..."
+          du -h .
+
       # - name: Compress all artifacts
       #   working-directory: ./artifacts
       #   run: find . -maxdepth 1 -mindepth 1 -type d -exec tar zcvf ../compressed_artifacts/{}.tar.gz {}  \;
