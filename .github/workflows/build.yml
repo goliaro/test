@@ -33,7 +33,7 @@ jobs:
         env:
           NCCL_TARBALL: nccl_ubuntu-20.04_11.7.0.tar.gz
         run: |
-          set -x
+          #set -x
           mkdir -p build/deps
           cd build/deps
           echo "Downloading..."
