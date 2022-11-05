@@ -30,8 +30,6 @@ jobs:
           submodules: recursive
 
       - name: Build NCCL/Legion
-        env:
-          #DEPENDENCY: ${{ matrix.dependency }}
         run: |
           set -x
           mkdir -p build/deps
