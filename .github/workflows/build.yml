@@ -46,7 +46,7 @@ jobs:
           du -h nccl
           echo "Removing unnecessary stuff"
           rm -rf nccl/obj nccl/src nccl/tmp
-          rm -rf lib/*.so.*
+          rm -rf nccl/lib/*.so.*
           echo "Checking size of nccl folder again..."
           du -h nccl
           echo "Creating a couple of simlinks..."
