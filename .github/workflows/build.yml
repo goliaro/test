@@ -112,6 +112,16 @@ jobs:
           echo "Calling du in folder..."
           du -h .
 
+      - name: Get datetime
+        run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      
+      - name: Release
+        env:
+          NAME: ${{ env.RELEASE_DATETIME }}
+          TAG_NAME: ${{ env.RELEASE_DATETIME }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        run: gh release create $TAG_NAME ./artifact/nccl_ubuntu-20.04_11.7.0/*.tar.gz
+
       # - name: Compress all artifacts
       #   working-directory: ./artifacts
       #   run: find . -maxdepth 1 -mindepth 1 -type d -exec tar zcvf ../compressed_artifacts/{}.tar.gz {}  \;
