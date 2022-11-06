@@ -92,6 +92,10 @@ jobs:
     runs-on: ubuntu-20.04
     needs: build-dependencies
     steps:
+      - name: Checkout Git Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Create folder for artifacts
         run: mkdir artifacts
       - name: Download artifacts
