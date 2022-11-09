@@ -38,3 +38,7 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Check if CPU supports AVX
+        run: lscpu | grep avx
+      - name: Check if CPU supports AVX2
+        run: lscpu | grep avx2
