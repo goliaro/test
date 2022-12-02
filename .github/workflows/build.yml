@@ -14,14 +14,6 @@ concurrency:
 jobs:
   build-dependencies:
     name: Build Test
-    strategy:
-      matrix:
-        os: [ubuntu-20.04]
-        cuda_version:
-          [
-            "10.1.243"
-          ]
-      fail-fast: true
     runs-on: ${{ matrix.os }}
     steps:
       # - name: Checkout Git Repository
