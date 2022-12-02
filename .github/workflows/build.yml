@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build-dependencies:
-    name: Build the FlexFlow dependencies
+    name: Build Test
     strategy:
       matrix:
         os: [ubuntu-20.04]
@@ -24,11 +24,18 @@ jobs:
       fail-fast: true
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout Git Repository
-        uses: actions/checkout@v3
+      # - name: Checkout Git Repository
+      #   uses: actions/checkout@v3
+      #   with:
+      #     submodules: recursive
+      - name: Check Free Space
+        run: |
+          echo "Free space:"
+          df -h
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
         with:
-          submodules: recursive
-      - name: Build
+      - name: Check Free Space again
         run: |
           echo "Free space:"
           df -h
