@@ -1,0 +1,36 @@
+name: "build"
+on:
+  schedule:
+    # Run weekly on Saturday at midnight PT (3am ET / 8am UTC)
+    - cron: "0 8 * * 6"
+  push:
+    branches:
+      - "master"
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: build-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+jobs:
+  build-dependencies:
+    name: Build Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Free Space
+        run: |
+          echo "Free space:"
+          df -h
+      # - name: Maximize build space
+      #   uses: easimon/maximize-build-space@master
+      - name: Free space some more space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        
+      - name: Check Free Space again
+        run: |
+          echo "Free space:"
+          df -h
